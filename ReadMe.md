@@ -1,11 +1,11 @@
 # Portfolio Platform
 
-This is an open-source platform that allows developers to build, manage, and deploy their portfolios. The system is designed as a monorepo including both the frontend and backend, and leverages AWS CDK for managing infrastructure.
+Portfolio platform allows developers to build, manage, and deploy their portfolios. The system is designed as a monorepo including both the frontend and backend, and leverages AWS CDK for managing infrastructure.
 
 ## Features
 
-- AWS S3 for static website hosting
-- DynamoDB for storing blog articles and contact form responses
+- AWS S3 for static website hosting and blog articles
+- DynamoDB for storing contact form responses
 - AWS Lambda functions for serverless operations
 - Custom domain setup with AWS Route 53
 - Admin dashboard for content management
