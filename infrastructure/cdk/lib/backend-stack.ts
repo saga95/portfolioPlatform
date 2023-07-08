@@ -1,19 +1,14 @@
-import { Duration, Stack, StackProps } from 'aws-cdk-lib';
-import * as sns from 'aws-cdk-lib/aws-sns';
-import * as subs from 'aws-cdk-lib/aws-sns-subscriptions';
-import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
-export class BackendStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
+let appName: string = "demo-app"
+export class BackendStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const queue = new sqs.Queue(this, 'BackendQueue', {
-      visibilityTimeout: Duration.seconds(300)
+    new s3.Bucket(this, `MyBucket-${appName}`, {
+      versioned: true,
     });
-
-    const topic = new sns.Topic(this, 'BackendTopic');
-
-    topic.addSubscription(new subs.SqsSubscription(queue));
   }
 }
