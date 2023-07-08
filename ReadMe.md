@@ -37,6 +37,17 @@ Navigate to the frontend directory, install dependencies:
 `cd ../packages/frontend
 npm install
 `
+
+### Deploying the frontend app
+```mermaid
+sequenceDiagram
+    participant Dev as Developer
+    participant GH as GitHub
+    participant AWS as AWS S3
+    Dev->>GH: Push changes to GitHub
+    GH->>AWS: GitHub Actions deploys changes to S3
+    AWS-->>Dev: Deployment complete, changes live on S3
+```
 ## Usage
 
 Once all the services are running, you can visit http://localhost:3000 to view the portfolio platform.
