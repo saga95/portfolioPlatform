@@ -27,7 +27,7 @@ jobs:
     - name: Get S3 bucket name
       id: get_bucket_name
       run: |
-        BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name my-stack-name --query "Stacks[0].Outputs[?OutputKey=='BucketName'].OutputValue" --output text)
+        BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name BackendStack --query "Stacks[0].Outputs[?OutputKey=='BucketName'].OutputValue" --output text)
         echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
 
     - name: Deploy to S3
