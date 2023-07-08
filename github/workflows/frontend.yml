@@ -1,0 +1,42 @@
+name: Frontend Deployment
+
+on:
+  push:
+    paths:
+      - 'packages/frontend/**'
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 14
+
+    - name: Install dependencies
+      run: cd packages/frontend && npm ci
+
+    - name: Build
+      run: cd packages/frontend && npm run build
+
+    - name: Get S3 bucket name
+      id: get_bucket_name
+      run: |
+        BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name my-stack-name --query "Stacks[0].Outputs[?OutputKey=='BucketName'].OutputValue" --output text)
+        echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
+
+    - name: Deploy to S3
+      uses: jakejarvis/s3-sync-action@v0.5.1
+      with:
+        args: --acl public-read --follow-symlinks --delete
+        bucket: ${{ env.BUCKET_NAME }}
+        key_prefix: portfolio/
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: 'us-west-2'
