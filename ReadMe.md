@@ -27,14 +27,14 @@ git clone https://github.com/{your-username}/portfolio-platform.git
 
 Navigate to the backend directory, install dependencies and bootstrap the CDK:
 
-`cd portfolio-platform/backend
+`cd portfolio-platform/infrastrucutre/cdk
 npm install
 cdk bootstrap
 `
 
 Navigate to the frontend directory, install dependencies:
 
-`cd ../frontend
+`cd ../packages/frontend
 npm install
 `
 ## Usage
