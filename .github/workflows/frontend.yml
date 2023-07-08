@@ -19,7 +19,7 @@ jobs:
         node-version: 14
 
     - name: Install dependencies
-      run: cd packages/frontend && npm ci
+      run: cd packages/frontend && npm i
 
     - name: Build
       run: cd packages/frontend && npm run build
