@@ -7,10 +7,10 @@ Demo link: http://portfoliodemo.sagara.me/
 ## Features
 
 - AWS S3 for static website hosting and blog articles
-- DynamoDB for storing contact form responses
-- AWS Lambda functions for serverless operations
-- Custom domain setup with AWS Route 53
-- Admin dashboard for content management
+- Custom domain setup with AWS Route 53 
+- DynamoDB for storing contact form responses (in-progress)
+- AWS Lambda functions for serverless operations (in-progress)
+- Admin dashboard for content management (in-progress)
 
 ## Kickstart
 
