@@ -22,10 +22,10 @@ jobs:
       run: cd infrastructure/cdk && npm i
 
     - name: Synth
-      run: cd infrastructure/cdk && npx cdk synth --app BackendStack
+      run: cd infrastructure/cdk && npx cdk synth
 
     - name: Deploy
-      run: cd infrastructure/cdk && npx cdk deploy --app BackendStack
+      run: cd infrastructure/cdk && npx cdk deploy
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
