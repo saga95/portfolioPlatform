@@ -25,13 +25,15 @@ export class BackendStack extends cdk.Stack {
       value: portfolioBucket.bucketName,
     });
 
-    const zone = HostedZone.fromLookup(this, 'Zone', { domainName: 'sagara.me' });
+    const zone = HostedZone.fromLookup(this, "Zone", {
+      domainName: "sagara.me",
+      privateZone: false,
+    });
 
     new ARecord(this, "SiteAliasRecord", {
       recordName: "www",
       target: RecordTarget.fromAlias(new BucketWebsiteTarget(portfolioBucket)),
-      zone
-    })
-
+      zone: zone,
+    });
   }
 }
