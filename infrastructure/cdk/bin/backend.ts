@@ -3,4 +3,9 @@ import * as cdk from 'aws-cdk-lib';
 import { BackendStack } from '../lib/backend-stack';
 
 const app = new cdk.App();
-new BackendStack(app, 'BackendStack');
+new BackendStack(app, 'BackendStack', {
+    env: {
+      account: process.env.CDK_DEFAULT_ACCOUNT,
+      region: 'us-west-2',
+    },
+  });
