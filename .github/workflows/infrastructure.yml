@@ -33,6 +33,12 @@ jobs:
       run: |
         aws sts get-caller-identity
 
+    - name: Print access
+      run: echo ${{ ecrets.AWS_ACCESS_KEY_ID }}
+
+    - name: Print secret
+      run: echo ${{ ecrets.AWS_SECRET_ACCESS_KEY }}
+
     - name: Deploy
       run: cd infrastructure/cdk && npx cdk deploy BackendStack --require-approval never
       env:
