@@ -14,6 +14,7 @@ export class BackendStack extends cdk.Stack {
     });
 
     console.log(portfolioBucket.isWebsite)
+    console.log(portfolioBucket.isWebsite)
     portfolioBucket.addToResourcePolicy(new iam.PolicyStatement({
       actions: ['s3:GetObject'],
       resources: [portfolioBucket.arnForObjects('*')],
