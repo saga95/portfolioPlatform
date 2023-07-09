@@ -10,6 +10,7 @@ export class BackendStack extends cdk.Stack {
 
     const portfolioBucket = new s3.Bucket(this, `MyBucket-${appName}`, {
       versioned: true,
+      websiteIndexDocument: "index.html"
     });
 
     portfolioBucket.addToResourcePolicy(new iam.PolicyStatement({
@@ -17,6 +18,7 @@ export class BackendStack extends cdk.Stack {
       resources: [portfolioBucket.arnForObjects('*')],
       principals: [new iam.AnyPrincipal()],
     }));
+
     new cdk.CfnOutput(this, "BucketName", {
       value: portfolioBucket.bucketName,
     });
