@@ -10,16 +10,19 @@ export class BackendStack extends cdk.Stack {
 
     const portfolioBucket = new s3.Bucket(this, `MyBucket-${appName}`, {
       versioned: true,
-      websiteIndexDocument: "index.html"
+      websiteIndexDocument: "index.html",
+      websiteErrorDocument: "error.html",
+      publicReadAccess: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    console.log(portfolioBucket.isWebsite)
-    console.log(portfolioBucket.isWebsite)
-    portfolioBucket.addToResourcePolicy(new iam.PolicyStatement({
-      actions: ['s3:GetObject'],
-      resources: [portfolioBucket.arnForObjects('*')],
-      principals: [new iam.AnyPrincipal()],
-    }));
+    // console.log(portfolioBucket.isWebsite)
+    // console.log(portfolioBucket.isWebsite)
+    // portfolioBucket.addToResourcePolicy(new iam.PolicyStatement({
+    //   actions: ['s3:GetObject'],
+    //   resources: [portfolioBucket.arnForObjects('*')],
+    //   principals: [new iam.AnyPrincipal()],
+    // }));
 
     new cdk.CfnOutput(this, "BucketName", {
       value: portfolioBucket.bucketName,
