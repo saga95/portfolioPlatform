@@ -15,8 +15,6 @@ jobs:
 
     - name: Setup Node.js
       uses: actions/setup-node@v3
-      with:
-        node-version: 14
 
     - name: Install dependencies
       run: cd infrastructure/cdk && npm i
@@ -29,7 +27,7 @@ jobs:
         aws-region: 'us-west-2'
 
     - name: Synth
-      run: cd infrastructure/cdk && npx cdk synth
+      run: cd infrastructure/cdk && cdk synth BackendStack
 
     - name: Deploy
-      run: cd infrastructure/cdk && npx cdk deploy --require-approval never
+      run: cd infrastructure/cdk && cdk deploy BackendStack --require-approval never
