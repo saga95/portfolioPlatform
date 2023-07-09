@@ -13,7 +13,6 @@ export class BackendStack extends cdk.Stack {
       websiteIndexDocument: "index.html"
     });
 
-    console.log(portfolioBucket.isWebsite)
     portfolioBucket.addToResourcePolicy(new iam.PolicyStatement({
       actions: ['s3:GetObject'],
       resources: [portfolioBucket.arnForObjects('*')],
