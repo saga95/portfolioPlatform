@@ -10,10 +10,7 @@ export class BackendStack extends cdk.Stack {
 
     const portfolioBucket = new s3.Bucket(this, `MyBucket-${appName}`, {
       versioned: true,
-      websiteIndexDocument: "index.html",
-      websiteErrorDocument: "error.html",
-      publicReadAccess: true,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      websiteIndexDocument: "index.html"
     });
 
     new cdk.CfnOutput(this, "BucketName", {
