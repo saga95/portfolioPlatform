@@ -3,12 +3,16 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { ARecord, HostedZone, RecordTarget } from "aws-cdk-lib/aws-route53";
 import { BucketWebsiteTarget } from "aws-cdk-lib/aws-route53-targets";
+
 let appName: string = "demo-app";
+let domainName: string = "portfoliodemo.sagara.me";
+
 export class BackendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     const portfolioBucket = new s3.Bucket(this, `MyBucket-${appName}`, {
+      bucketName: domainName,
       versioned: true,
       websiteIndexDocument: "index.html",
       publicReadAccess: true,
@@ -25,13 +29,11 @@ export class BackendStack extends cdk.Stack {
       value: portfolioBucket.bucketName,
     });
 
-    const zone = HostedZone.fromLookup(this, "Zone", {
-      domainName: "sagara.me",
-      privateZone: false,
+    const zone = new HostedZone(this, `MyHostedZone-${appName}`, {
+      zoneName: domainName,
     });
 
     new ARecord(this, "SiteAliasRecord", {
-      recordName: "www",
       target: RecordTarget.fromAlias(new BucketWebsiteTarget(portfolioBucket)),
       zone: zone,
     });
