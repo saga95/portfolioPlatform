@@ -19,9 +19,6 @@ jobs:
     - name: Install dependencies
       run: cd infrastructure/cdk && npm i
 
-    - name: Install aws-cdk cli
-      run: npm i -g aws-cdk
-
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -30,7 +27,15 @@ jobs:
         aws-region: 'us-west-2'
 
     - name: Synth
-      run: cd infrastructure/cdk && cdk synth BackendStack
+      run: cd infrastructure/cdk && npx cdk synth BackendStack
+
+    - name: Debug
+      run: |
+        aws sts get-caller-identity
 
     - name: Deploy
-      run: cd infrastructure/cdk && cdk deploy BackendStack --require-approval never
+      run: cd infrastructure/cdk && npx cdk deploy BackendStack --require-approval never
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
