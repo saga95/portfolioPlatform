@@ -1,5 +1,4 @@
 import * as s3 from "aws-cdk-lib/aws-s3";
-import * as iam from 'aws-cdk-lib/aws-iam';
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 
@@ -12,6 +11,13 @@ export class BackendStack extends cdk.Stack {
       versioned: true,
       websiteIndexDocument: "index.html",
       publicReadAccess: true,
+      objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
+      blockPublicAccess: new s3.BlockPublicAccess({
+        blockPublicAcls: false,
+        blockPublicPolicy: false,
+        ignorePublicAcls: false,
+        restrictPublicBuckets: false,
+      }),
     });
 
     new cdk.CfnOutput(this, "BucketName", {
