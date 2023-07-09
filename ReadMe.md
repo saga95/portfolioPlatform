@@ -2,6 +2,8 @@
 
 Portfolio platform allows developers to build, manage, and deploy their portfolios. The system is designed as a monorepo including both the frontend and backend, and leverages AWS CDK for managing infrastructure.
 
+Demo link: http://portfoliodemo.sagara.me/
+
 ## Features
 
 - AWS S3 for static website hosting and blog articles
@@ -10,7 +12,7 @@ Portfolio platform allows developers to build, manage, and deploy their portfoli
 - Custom domain setup with AWS Route 53
 - Admin dashboard for content management
 
-## Getting Started
+## Kickstart
 
 Before you begin, make sure you have the following prerequisites:
 
@@ -19,7 +21,7 @@ Before you begin, make sure you have the following prerequisites:
 - AWS CDK installed and configured
 - A GitHub account
 
-Clone this repository to your local machine.
+First, fork this repository to your own GitHub account. Then, clone the forked repository to your local machine using:
 
 ```sh
 git clone https://github.com/{your-username}/portfolio-platform.git
@@ -37,6 +39,18 @@ Navigate to the frontend directory, install dependencies:
 `cd ../packages/frontend
 npm install
 `
+### Safeguard Your Secrets
+
+Add following secrets to the github profile
+
+- AWS_ACCESS_KEY_ID
+- AWS_SECRET_ACCESS_KEY
+- AWS_ACCOUNT_ID
+
+### A Little Tweak
+
+- Goto infrastructure\cdk\lib\backend-stack.ts
+- Update the domainName prop
 
 ### Deploying the frontend app
 ```mermaid
@@ -48,10 +62,24 @@ sequenceDiagram
     GH->>AWS: GitHub Actions deploys changes to S3
     AWS-->>Dev: Deployment complete, changes live on S3
 ```
-## Usage
+### Deploying the CDK as infrastructure
+```mermaid
+sequenceDiagram
+    participant User as User
+    participant GitHub as GitHub
+    participant AWS as AWS
+    User->>GitHub: Push code to GitHub
+    GitHub->>GitHub: Checkout code
+    GitHub->>GitHub: Setup Node.js
+    GitHub->>GitHub: Install dependencies
+    GitHub->>AWS: Configure AWS credentials
+    GitHub->>GitHub: Synth
+    GitHub->>AWS: Deploy
+```
+### Updating Nameservers: The Final Step 
 
-Once all the services are running, you can visit http://localhost:3000 to view the portfolio platform.
-
+- You can find nameservers related to your domain once you are done with the deployement.
+- Visit your domain registras to update your nameservers. 
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.

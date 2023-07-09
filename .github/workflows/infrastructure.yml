@@ -34,16 +34,6 @@ jobs:
     - name: Synth
       run: cd infrastructure/cdk && npx cdk synth BackendStack
 
-    - name: Debug
-      run: |
-        aws sts get-caller-identity
-
-    - name: Print access
-      run: echo ${{ secrets.AWS_ACCESS_KEY_ID }}
-
-    - name: Print secret
-      run: echo ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
     - name: Deploy
       run: cd infrastructure/cdk && npx cdk deploy BackendStack --require-approval never
       env:
