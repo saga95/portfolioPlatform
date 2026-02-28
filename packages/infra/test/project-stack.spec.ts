@@ -18,10 +18,10 @@ describe('ProjectStack', () => {
     template.resourceCountIs('AWS::DynamoDB::Table', 1);
   }, 30_000);
 
-  it('should create Lambda functions for project, execution, and deployment handlers', () => {
+  it('should create Lambda functions for project, execution, deployment, and billing handlers', () => {
     const stack = createStack();
     const template = Template.fromStack(stack);
-    template.resourceCountIs('AWS::Lambda::Function', 3);
+    template.resourceCountIs('AWS::Lambda::Function', 4);
   });
 
   it('should create an API Gateway REST API', () => {
@@ -89,8 +89,8 @@ describe('ProjectStack', () => {
   it('should grant all Lambdas access to table via IAM', () => {
     const stack = createStack();
     const template = Template.fromStack(stack);
-    // project + execution + deployment Lambdas should have IAM policies for DynamoDB
-    template.resourceCountIs('AWS::IAM::Policy', 3);
+    // project + execution + deployment + billing Lambdas should have IAM policies for DynamoDB
+    template.resourceCountIs('AWS::IAM::Policy', 4);
   });
 
   it('should expose stack outputs', () => {
@@ -113,12 +113,24 @@ describe('ProjectStack', () => {
     });
   });
 
-  it('should create three Cognito authorizers', () => {
+  it('should create four Cognito authorizers', () => {
     const stack = createStack();
     const template = Template.fromStack(stack);
     const authorizers = template.findResources('AWS::ApiGateway::Authorizer', {
       Properties: { Type: 'COGNITO_USER_POOLS' },
     });
-    expect(Object.keys(authorizers).length).toBe(3);
+    expect(Object.keys(authorizers).length).toBe(4);
+  });
+
+  it('should pass PayHere environment variables to billing Lambda', () => {
+    const stack = createStack();
+    const template = Template.fromStack(stack);
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Environment: {
+        Variables: Match.objectLike({
+          PAYHERE_SANDBOX: 'true',
+        }),
+      },
+    });
   });
 });

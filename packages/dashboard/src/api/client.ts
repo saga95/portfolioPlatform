@@ -1,4 +1,4 @@
-import type { ProjectStatus, AgentExecutionStatus, DeploymentStatus } from '@promptdeploy/shared-types';
+import type { ProjectStatus, AgentExecutionStatus, DeploymentStatus, Plan, SubscriptionStatus } from '@promptdeploy/shared-types';
 import { getIdToken } from '../auth/cognito-service';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
@@ -94,6 +94,32 @@ export type DeploymentAction =
   | 'mark_failed'
   | 'start_rollback'
   | 'retry';
+
+// ─── Subscription / Billing Types ───────────────────────────────────────────
+
+export interface SubscriptionDTO {
+  subscriptionId: string;
+  tenantId: string;
+  payhereSubscriptionId?: string;
+  plan: Plan;
+  status: SubscriptionStatus;
+  currentPeriodStart: string;
+  currentPeriodEnd: string;
+  createdAt: string;
+  updatedAt: string;
+  cancelledAt?: string;
+}
+
+export interface SubscriptionListDTO {
+  subscriptions: SubscriptionDTO[];
+  nextToken?: string;
+}
+
+export interface CheckoutSessionDTO {
+  subscriptionId: string;
+  actionUrl: string;
+  params: Record<string, string>;
+}
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -237,6 +263,35 @@ export const api = {
         method: 'PATCH',
         headers: { 'x-tenant-id': tenantId },
         body: JSON.stringify({ action, ...extra }),
+      });
+    },
+  },
+
+  subscriptions: {
+    list(tenantId: string): Promise<SubscriptionListDTO> {
+      return request<SubscriptionListDTO>('/subscriptions', {
+        headers: { 'x-tenant-id': tenantId },
+      });
+    },
+
+    get(tenantId: string, subscriptionId: string): Promise<SubscriptionDTO> {
+      return request<SubscriptionDTO>(`/subscriptions/${subscriptionId}`, {
+        headers: { 'x-tenant-id': tenantId },
+      });
+    },
+
+    create(tenantId: string, plan: 'pro' | 'team' | 'enterprise'): Promise<CheckoutSessionDTO> {
+      return request<CheckoutSessionDTO>('/subscriptions', {
+        method: 'POST',
+        headers: { 'x-tenant-id': tenantId },
+        body: JSON.stringify({ plan }),
+      });
+    },
+
+    cancel(tenantId: string, subscriptionId: string): Promise<SubscriptionDTO> {
+      return request<SubscriptionDTO>(`/subscriptions/${subscriptionId}`, {
+        method: 'DELETE',
+        headers: { 'x-tenant-id': tenantId },
       });
     },
   },

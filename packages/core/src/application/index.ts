@@ -4,3 +4,4 @@ export * from './use-cases/index.js';
 export { ProjectMapper } from './mappers/project-mapper.js';
 export { ExecutionMapper } from './mappers/execution-mapper.js';
 export { DeploymentMapper } from './mappers/deployment-mapper.js';
+export { SubscriptionMapper } from './mappers/subscription-mapper.js';

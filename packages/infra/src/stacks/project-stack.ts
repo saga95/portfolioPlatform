@@ -4,7 +4,7 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as lambdaNode from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as path from 'node:path';
-import { ProjectTable, ProjectApi, ExecutionApi, DeploymentApi, CognitoAuth } from '@promptdeploy/cdk-constructs';
+import { ProjectTable, ProjectApi, ExecutionApi, DeploymentApi, BillingApi, CognitoAuth } from '@promptdeploy/cdk-constructs';
 
 export interface ProjectStackProps extends cdk.StackProps {
   /**
@@ -22,6 +22,16 @@ export interface ProjectStackProps extends cdk.StackProps {
    * @default ['http://localhost:5173']
    */
   readonly dashboardUrls?: string[];
+
+  /**
+   * PayHere merchant configuration.
+   */
+  readonly payhereMerchantId?: string;
+  readonly payhereMerchantSecret?: string;
+  readonly payhereNotifyUrl?: string;
+  readonly payhereReturnUrl?: string;
+  readonly payhereCancelUrl?: string;
+  readonly payhereSandbox?: boolean;
 }
 
 /**
@@ -206,6 +216,61 @@ export class ProjectStack extends cdk.Stack {
       deploymentHandler,
       methodOptions: {
         authorizer: deploymentAuthorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      },
+    });
+
+    // ─── Billing Lambda ──────────────────────────────────────────────
+
+    const billingHandler = new lambdaNode.NodejsFunction(this, 'BillingHandler', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      architecture: lambda.Architecture.ARM_64,
+      memorySize: 512,
+      timeout: cdk.Duration.seconds(30),
+      entry: path.join(workspaceRoot, 'packages/api/src/lambda/billing-handler.ts'),
+      handler: 'handler',
+      projectRoot: workspaceRoot,
+      depsLockFilePath: path.join(workspaceRoot, 'pnpm-lock.yaml'),
+      bundling: {
+        minify: true,
+        sourceMap: true,
+        target: 'node20',
+        format: lambdaNode.OutputFormat.ESM,
+        mainFields: ['module', 'main'],
+        externalModules: ['@aws-sdk/*'],
+        tsconfig: path.join(workspaceRoot, 'tsconfig.base.json'),
+        esbuildArgs: {
+          '--resolve-extensions': '.ts,.js,.mjs,.json',
+        },
+      },
+      environment: {
+        NODE_OPTIONS: '--enable-source-maps',
+        TABLE_NAME: projectTable.tableName,
+        PAYHERE_MERCHANT_ID: props.payhereMerchantId ?? '',
+        PAYHERE_MERCHANT_SECRET: props.payhereMerchantSecret ?? '',
+        PAYHERE_NOTIFY_URL: props.payhereNotifyUrl ?? '',
+        PAYHERE_RETURN_URL: props.payhereReturnUrl ?? '',
+        PAYHERE_CANCEL_URL: props.payhereCancelUrl ?? '',
+        PAYHERE_SANDBOX: String(props.payhereSandbox ?? true),
+      },
+      tracing: lambda.Tracing.ACTIVE,
+    });
+
+    // Grant DynamoDB read/write for billing Lambda
+    projectTable.table.grantReadWriteData(billingHandler);
+
+    // ─── Billing API Routes ──────────────────────────────────────────
+
+    const billingAuthorizer = new apigateway.CognitoUserPoolsAuthorizer(this, 'BillingCognitoAuthorizer', {
+      cognitoUserPools: [auth.userPool],
+      identitySource: 'method.request.header.Authorization',
+    });
+
+    new BillingApi(this, 'BillingApi', {
+      api: projectApi.api,
+      billingHandler,
+      methodOptions: {
+        authorizer: billingAuthorizer,
         authorizationType: apigateway.AuthorizationType.COGNITO,
       },
     });

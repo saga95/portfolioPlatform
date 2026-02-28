@@ -108,3 +108,56 @@ export const listDeploymentsQuerySchema = z.object({
 export type StartDeploymentInput = z.infer<typeof startDeploymentSchema>;
 export type UpdateDeploymentInput = z.infer<typeof updateDeploymentSchema>;
 export type ListDeploymentsQueryInput = z.infer<typeof listDeploymentsQuerySchema>;
+
+// ─── Billing / Subscription Schemas ─────────────────────────────────────────
+
+const subscriptionIdSchema = z.string().startsWith('sub_', 'Must start with "sub_"');
+
+export const createSubscriptionSchema = z.object({
+  plan: z.enum(['pro', 'team', 'enterprise']),
+});
+
+export const cancelSubscriptionSchema = z.object({
+  // Body intentionally empty — subscriptionId comes from path params
+});
+
+export const subscriptionPathParamsSchema = z.object({
+  subscriptionId: subscriptionIdSchema,
+});
+
+export const listSubscriptionsQuerySchema = z.object({
+  nextToken: z.string().optional(),
+});
+
+/**
+ * PayHere webhook payload schema.
+ * PayHere sends application/x-www-form-urlencoded data.
+ */
+export const payhereWebhookSchema = z.object({
+  merchant_id: z.string().min(1),
+  order_id: z.string().min(1),
+  payment_id: z.string().min(1),
+  subscription_id: z.string().optional(),
+  payhere_amount: z.string().min(1),
+  payhere_currency: z.string().min(1),
+  status_code: z.string().min(1),
+  md5sig: z.string().min(1),
+  method: z.string().optional(),
+  status_message: z.string().optional(),
+  custom_1: z.string().optional(),
+  custom_2: z.string().optional(),
+  recurring: z.string().optional(),
+  message_type: z.string().optional(),
+  item_recurrence: z.string().optional(),
+  item_duration: z.string().optional(),
+  item_rec_status: z.string().optional(),
+  item_rec_date_next: z.string().optional(),
+  item_rec_install_paid: z.string().optional(),
+  card_holder_name: z.string().optional(),
+  card_no: z.string().optional(),
+  card_expiry: z.string().optional(),
+});
+
+export type CreateSubscriptionInput = z.infer<typeof createSubscriptionSchema>;
+export type PayHereWebhookInput = z.infer<typeof payhereWebhookSchema>;
+export type ListSubscriptionsQueryInput = z.infer<typeof listSubscriptionsQuerySchema>;

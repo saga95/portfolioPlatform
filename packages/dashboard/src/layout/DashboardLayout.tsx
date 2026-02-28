@@ -17,7 +17,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import { MenuIcon, DashboardIcon, FolderIcon, SettingsIcon, LogoutIcon, RocketLaunchIcon } from '../components/icons.js';
+import { MenuIcon, DashboardIcon, FolderIcon, SettingsIcon, LogoutIcon, RocketLaunchIcon, PaymentIcon } from '../components/icons.js';
 import { useAuth } from '../auth/index.js';
 
 const DRAWER_WIDTH = 260;
@@ -31,6 +31,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard', path: '/', icon: <DashboardIcon /> },
   { label: 'Projects', path: '/projects', icon: <FolderIcon /> },
+  { label: 'Billing', path: '/billing', icon: <PaymentIcon /> },
   { label: 'Settings', path: '/settings', icon: <SettingsIcon /> },
 ];
 

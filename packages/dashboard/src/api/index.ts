@@ -10,5 +10,8 @@ export type {
   DeploymentDTO,
   DeploymentListDTO,
   DeploymentAction,
+  SubscriptionDTO,
+  SubscriptionListDTO,
+  CheckoutSessionDTO,
   ApiError,
 } from './client.js';

@@ -1,4 +1,4 @@
-import type { ProjectStatus, AgentExecutionStatus, DeploymentStatus } from '@promptdeploy/shared-types';
+import type { ProjectStatus, AgentExecutionStatus, DeploymentStatus, SubscriptionStatus, Plan } from '@promptdeploy/shared-types';
 import type { PipelineStep } from '../../domain/entities/agent-execution.js';
 
 // ─── Command DTOs (input to use cases) ──────────────────────────────────────
@@ -177,5 +177,73 @@ export interface DeploymentDTO {
 
 export interface DeploymentListDTO {
   readonly deployments: DeploymentDTO[];
+  readonly nextToken?: string;
+}
+
+// ─── Billing / Subscription Commands ────────────────────────────────────────
+
+export interface CreateSubscriptionCommand {
+  readonly tenantId: string;
+  readonly plan: Plan;
+}
+
+export interface GetSubscriptionQuery {
+  readonly tenantId: string;
+  readonly subscriptionId: string;
+}
+
+export interface ListSubscriptionsQuery {
+  readonly tenantId: string;
+  readonly nextToken?: string;
+}
+
+export interface CancelSubscriptionCommand {
+  readonly tenantId: string;
+  readonly subscriptionId: string;
+}
+
+export interface HandlePayHereWebhookCommand {
+  readonly merchantId: string;
+  readonly orderId: string;
+  readonly paymentId: string;
+  readonly subscriptionId?: string;
+  readonly payhereAmount: string;
+  readonly payhereCurrency: string;
+  readonly statusCode: string;
+  readonly md5sig: string;
+  readonly messageType?: string;
+  readonly itemRecStatus?: string;
+  readonly itemRecDateNext?: string;
+  readonly custom1?: string;
+  readonly custom2?: string;
+}
+
+/**
+ * Checkout session data returned to the frontend
+ * so it can redirect the user to PayHere.
+ */
+export interface CheckoutSessionDTO {
+  readonly subscriptionId: string;
+  readonly actionUrl: string;
+  readonly params: Record<string, string>;
+}
+
+// ─── Billing / Subscription Response DTOs ───────────────────────────────────
+
+export interface SubscriptionDTO {
+  readonly subscriptionId: string;
+  readonly tenantId: string;
+  readonly payhereSubscriptionId?: string;
+  readonly plan: Plan;
+  readonly status: SubscriptionStatus;
+  readonly currentPeriodStart: string;
+  readonly currentPeriodEnd: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly cancelledAt?: string;
+}
+
+export interface SubscriptionListDTO {
+  readonly subscriptions: SubscriptionDTO[];
   readonly nextToken?: string;
 }

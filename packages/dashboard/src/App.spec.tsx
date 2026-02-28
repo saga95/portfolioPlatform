@@ -47,6 +47,13 @@ describe('App', () => {
     });
   });
 
+  it('should navigate to billing page', async () => {
+    renderApp('/billing');
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /billing/i })).toBeInTheDocument();
+    });
+  });
+
   it('should redirect unknown routes to /', async () => {
     renderApp('/unknown');
     await waitFor(() => {

@@ -147,15 +147,62 @@ export type DeploymentStatus =
 export interface Subscription {
   readonly subscriptionId: string;
   readonly tenantId: string;
-  readonly paddleSubscriptionId?: string;
   readonly payhereSubscriptionId?: string;
   readonly plan: Plan;
   readonly status: SubscriptionStatus;
   readonly currentPeriodStart: string;
   readonly currentPeriodEnd: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly cancelledAt?: string;
 }
 
 export type SubscriptionStatus = 'active' | 'past_due' | 'cancelled' | 'trialing';
+
+/**
+ * PayHere webhook notification statuses.
+ * status_code: 2 = success, 0 = pending, -1 = canceled, -2 = failed, -3 = chargedback
+ */
+export type PayHereStatusCode = 2 | 0 | -1 | -2 | -3;
+
+/**
+ * PayHere recurring message types for subscription webhooks.
+ */
+export type PayHereMessageType =
+  | 'AUTHORIZATION_SUCCESS'
+  | 'AUTHORIZATION_FAILED'
+  | 'RECURRING_INSTALLMENT_SUCCESS'
+  | 'RECURRING_INSTALLMENT_FAILED'
+  | 'RECURRING_COMPLETE'
+  | 'RECURRING_STOPPED';
+
+/**
+ * PayHere webhook notification payload (Recurring API).
+ */
+export interface PayHereWebhookPayload {
+  readonly merchant_id: string;
+  readonly order_id: string;
+  readonly payment_id: string;
+  readonly subscription_id?: string;
+  readonly payhere_amount: string;
+  readonly payhere_currency: string;
+  readonly status_code: string;
+  readonly md5sig: string;
+  readonly method?: string;
+  readonly status_message?: string;
+  readonly custom_1?: string;
+  readonly custom_2?: string;
+  readonly recurring?: string;
+  readonly message_type?: string;
+  readonly item_recurrence?: string;
+  readonly item_duration?: string;
+  readonly item_rec_status?: string;
+  readonly item_rec_date_next?: string;
+  readonly item_rec_install_paid?: string;
+  readonly card_holder_name?: string;
+  readonly card_no?: string;
+  readonly card_expiry?: string;
+}
 
 // ─── Agent Bounded Context ────────────────────────────────────────────────────
 

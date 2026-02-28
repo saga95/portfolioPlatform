@@ -8,5 +8,7 @@ export { ExecutionApi } from './execution-api.js';
 export type { ExecutionApiProps } from './execution-api.js';
 export { DeploymentApi } from './deployment-api.js';
 export type { DeploymentApiProps } from './deployment-api.js';
+export { BillingApi } from './billing-api.js';
+export type { BillingApiProps } from './billing-api.js';
 export { CognitoAuth } from './cognito-auth.js';
 export type { CognitoAuthProps } from './cognito-auth.js';

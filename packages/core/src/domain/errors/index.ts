@@ -111,3 +111,35 @@ export class InvalidDeploymentTransitionError extends DomainError {
     );
   }
 }
+
+// ─── Billing Bounded Context Errors ─────────────────────────────────────────
+
+export class SubscriptionNotFoundError extends DomainError {
+  constructor(subscriptionId: string) {
+    super(`Subscription not found: ${subscriptionId}`, 'SUBSCRIPTION_NOT_FOUND');
+  }
+}
+
+export class InvalidSubscriptionTransitionError extends DomainError {
+  constructor(from: string, to: string) {
+    super(
+      `Invalid subscription status transition from "${from}" to "${to}"`,
+      'INVALID_SUBSCRIPTION_TRANSITION',
+    );
+  }
+}
+
+export class SubscriptionAlreadyExistsError extends DomainError {
+  constructor(tenantId: string) {
+    super(
+      `An active subscription already exists for tenant ${tenantId}`,
+      'SUBSCRIPTION_ALREADY_EXISTS',
+    );
+  }
+}
+
+export class PayHereWebhookVerificationError extends DomainError {
+  constructor() {
+    super('PayHere webhook signature verification failed', 'PAYHERE_WEBHOOK_VERIFICATION_FAILED');
+  }
+}

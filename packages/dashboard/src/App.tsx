@@ -3,6 +3,7 @@ import { DashboardLayout } from './layout/index.js';
 import { HomePage } from './pages/home/index.js';
 import { ProjectListPage, ProjectDetailPage, CreateProjectPage } from './pages/projects/index.js';
 import { SettingsPage } from './pages/settings/index.js';
+import { BillingPage } from './pages/billing/index.js';
 import { LoginPage } from './pages/auth/index.js';
 import { ProtectedRoute } from './components/ProtectedRoute.js';
 
@@ -24,6 +25,7 @@ export function App() {
         <Route path="/projects" element={<ProjectListPage />} />
         <Route path="/projects/new" element={<CreateProjectPage />} />
         <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
+        <Route path="/billing" element={<BillingPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
 
