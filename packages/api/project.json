@@ -1,0 +1,30 @@
+{
+  "name": "@promptdeploy/api",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/api/src",
+  "projectType": "library",
+  "tags": ["scope:backend", "type:interface"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/api",
+        "tsConfig": "packages/api/tsconfig.lib.json",
+        "main": "packages/api/src/index.ts"
+      }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "options": {
+        "reportsDirectory": "../../coverage/packages/api"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["packages/api/**/*.ts"]
+      }
+    }
+  }
+}

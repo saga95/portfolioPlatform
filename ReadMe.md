@@ -1,91 +1,89 @@
-# Portfolio Platform
+# PromptDeploy
 
-Portfolio platform allows developers to build, manage, and deploy their portfolios. The system is designed as a monorepo including both the frontend and backend, and leverages AWS CDK for managing infrastructure.
+> Prompt to SaaS — deploy your idea in minutes.
 
-Demo link: http://portfoliodemo.sagara.me/
+PromptDeploy is an open-core platform that transforms natural language prompts into fully deployed SaaS applications on AWS. Users describe what they want, and the platform generates code, infrastructure, and deploys it to their own AWS account.
 
-## Features
+## Architecture
 
-- AWS S3 for static website hosting and blog articles
-- Custom domain setup with AWS Route 53 
-- DynamoDB for storing contact form responses (in-progress)
-- AWS Lambda functions for serverless operations (in-progress)
-- Admin dashboard for content management (in-progress)
+- **NX Monorepo** — Integrated workspace with enforced module boundaries
+- **Clean Architecture + DDD** — Domain-driven design with 5 bounded contexts
+- **React + MUI** — Material UI dashboard for project management
+- **Serverless Backend** — Node.js Lambda handlers with Middy middleware
+- **AWS CDK** — Infrastructure as Code with reusable L3 constructs
+- **Multi-Agent System** — AI agents for requirement analysis, design, code generation, QA, and security review
 
-## Kickstart
+## Packages
 
-Before you begin, make sure you have the following prerequisites:
+| Package | Description | Tags |
+|---------|-------------|------|
+| `@promptdeploy/shared-types` | TypeScript interfaces shared across bounded contexts | `scope:shared` |
+| `@promptdeploy/shared-utils` | Common utilities (Result type, Guard, ID generation) | `scope:shared` |
+| `@promptdeploy/core` | Domain entities, value objects, use cases (Clean Architecture) | `scope:backend`, `type:domain` |
+| `@promptdeploy/api` | Lambda handlers, Middy middleware, Zod schemas | `scope:backend`, `type:interface` |
+| `@promptdeploy/dashboard` | React/MUI frontend application | `scope:frontend` |
+| `@promptdeploy/cdk-constructs` | Reusable CDK L3 constructs | `scope:infra` |
+| `@promptdeploy/infra` | CDK stacks composing constructs for deployment | `scope:infra` |
 
-- An AWS Account
-- Node.js installed locally
-- AWS CDK installed and configured
-- A GitHub account
+## Getting Started
 
-First, fork this repository to your own GitHub account. Then, clone the forked repository to your local machine using:
+### Prerequisites
 
-```sh
-git clone https://github.com/{your-username}/portfolio-platform.git
+- Node.js 20+
+- pnpm 10+
+- AWS CLI configured
+- AWS CDK CLI (`npm i -g aws-cdk`)
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/saga95/portfolioPlatform.git
+cd portfolioPlatform
+
+# Install dependencies
+pnpm install
+
+# Run all tests
+pnpm test
+
+# Start dashboard dev server
+pnpm nx serve @promptdeploy/dashboard
+
+# Build all packages
+pnpm build
 ```
 
-Navigate to the backend directory, install dependencies and bootstrap the CDK:
+### NX Commands
 
-`cd portfolio-platform/infrastrucutre/cdk
-npm install
-cdk bootstrap
-`
+```bash
+# Run tests for affected packages only
+pnpm nx affected -t test
 
-Navigate to the frontend directory, install dependencies:
+# Lint affected packages
+pnpm nx affected -t lint
 
-`cd ../packages/frontend
-npm install
-`
-### Safeguard Your Secrets
+# View dependency graph
+pnpm nx graph
 
-Add following secrets to the github profile
-
-- AWS_ACCESS_KEY_ID
-- AWS_SECRET_ACCESS_KEY
-- AWS_ACCOUNT_ID
-
-### A Little Tweak
-
-- Goto infrastructure\cdk\lib\backend-stack.ts
-- Update the domainName prop
-
-### Deploying the frontend app
-```mermaid
-sequenceDiagram
-    participant Dev as Developer
-    participant GH as GitHub
-    participant AWS as AWS S3
-    Dev->>GH: Push changes to GitHub
-    GH->>AWS: GitHub Actions deploys changes to S3
-    AWS-->>Dev: Deployment complete, changes live on S3
+# Format all files
+pnpm run format
 ```
-### Deploying the CDK as infrastructure
-```mermaid
-sequenceDiagram
-    participant User as User
-    participant GitHub as GitHub
-    participant AWS as AWS
-    User->>GitHub: Push code to GitHub
-    GitHub->>GitHub: Checkout code
-    GitHub->>GitHub: Setup Node.js
-    GitHub->>GitHub: Install dependencies
-    GitHub->>AWS: Configure AWS credentials
-    GitHub->>GitHub: Synth
-    GitHub->>AWS: Deploy
-```
-### Updating Nameservers: The Final Step 
 
-- You can find nameservers related to your domain once you are done with the deployement.
-- Visit your domain registras to update your nameservers. 
-## Contributing
+## Development Standards
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+- **Conventional Commits** — All commits must follow the [Conventional Commits](https://www.conventionalcommits.org/) spec (enforced via Commitlint + Husky)
+- **TDD** — Write tests first, then implement
+- **Clean Architecture** — Domain layer has zero external dependencies
+- **Module Boundaries** — NX enforces import rules between packages via scope/type tags
+
+## Compliance
+
+This project is designed to comply with:
+- **ISO 27001:2022** — Information Security Management
+- **ISO 9001:2015** — Quality Management System
+- **SOC 2 Type II** — Trust Service Criteria
 
 ## License
 
-[MIT](https://choosealicense.com/licenses/mit/)
-
-Please replace `{your-username}` with your actual GitHub username in the clone URL. As you make progress with your project, be sure to keep your README up-to-date, adding specific instructions for running your app, tests, and any other important information for users and contributors.
+MIT — see [LICENSE](LICENSE) for details.

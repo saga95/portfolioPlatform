@@ -1,0 +1,34 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "baseUrl": ".",
+    "paths": {
+      "@promptdeploy/shared-types": ["packages/shared-types/src/index.ts"],
+      "@promptdeploy/shared-utils": ["packages/shared-utils/src/index.ts"],
+      "@promptdeploy/core": ["packages/core/src/index.ts"],
+      "@promptdeploy/cdk-constructs": ["packages/cdk-constructs/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

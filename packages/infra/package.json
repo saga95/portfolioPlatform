@@ -1,0 +1,25 @@
+{
+  "name": "@promptdeploy/infra",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.lib.json",
+    "test": "vitest run",
+    "lint": "eslint src/",
+    "cdk": "cdk",
+    "synth": "cdk synth",
+    "deploy": "cdk deploy --all --require-approval never"
+  },
+  "dependencies": {
+    "@promptdeploy/api": "workspace:*",
+    "@promptdeploy/cdk-constructs": "workspace:*",
+    "aws-cdk-lib": "^2.185.0",
+    "constructs": "^10.4.0",
+    "source-map-support": "^0.5.21"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "aws-cdk": "^2.185.0"
+  }
+}

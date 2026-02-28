@@ -1,0 +1,30 @@
+{
+  "name": "@promptdeploy/cdk-constructs",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/cdk-constructs/src",
+  "projectType": "library",
+  "tags": ["scope:infra"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/cdk-constructs",
+        "tsConfig": "packages/cdk-constructs/tsconfig.lib.json",
+        "main": "packages/cdk-constructs/src/index.ts"
+      }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "options": {
+        "reportsDirectory": "../../coverage/packages/cdk-constructs"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["packages/cdk-constructs/**/*.ts"]
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "@promptdeploy/shared-types",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/shared-types/src",
+  "projectType": "library",
+  "tags": ["scope:shared", "type:domain"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/shared-types",
+        "tsConfig": "packages/shared-types/tsconfig.lib.json",
+        "main": "packages/shared-types/src/index.ts"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["packages/shared-types/**/*.ts"]
+      }
+    }
+  }
+}

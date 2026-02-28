@@ -1,0 +1,45 @@
+{
+  "name": "@promptdeploy/infra",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/infra/src",
+  "projectType": "application",
+  "tags": ["scope:infra"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/infra",
+        "tsConfig": "packages/infra/tsconfig.lib.json",
+        "main": "packages/infra/src/index.ts"
+      }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "options": {
+        "reportsDirectory": "../../coverage/packages/infra"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["packages/infra/**/*.ts"]
+      }
+    },
+    "synth": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx cdk synth",
+        "cwd": "packages/infra"
+      }
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx cdk deploy --all --require-approval never",
+        "cwd": "packages/infra"
+      },
+      "dependsOn": ["build"]
+    }
+  }
+}
