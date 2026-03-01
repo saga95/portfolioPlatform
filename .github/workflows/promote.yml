@@ -1,0 +1,189 @@
+name: Promote to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "promote" to confirm production deployment'
+        required: true
+        type: string
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  validate:
+    name: Validate Confirmation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check confirmation
+        if: github.event.inputs.confirm != 'promote'
+        run: |
+          echo "❌ You must type 'promote' to confirm. Got: '${{ github.event.inputs.confirm }}'"
+          exit 1
+
+  ci-gate:
+    name: Run CI
+    needs: [validate]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fe02b34f77f8bc703a7f0b4fee19bcbac4b21f62 # v4.1.0
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run all tests
+        run: pnpm nx run-many -t test --parallel=3 -- --run
+
+      - name: Build all
+        run: pnpm nx run-many -t build --parallel=3
+
+  deploy-prod-backend:
+    name: Deploy Backend (prod)
+    runs-on: ubuntu-latest
+    needs: [ci-gate]
+    timeout-minutes: 30
+    environment: prod
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fe02b34f77f8bc703a7f0b4fee19bcbac4b21f62 # v4.1.0
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: CDK Deploy (prod)
+        working-directory: packages/infra
+        env:
+          PAYHERE_MERCHANT_ID: ${{ secrets.PAYHERE_MERCHANT_ID }}
+          PAYHERE_MERCHANT_SECRET: ${{ secrets.PAYHERE_MERCHANT_SECRET }}
+        run: |
+          npx cdk deploy --all \
+            --require-approval never \
+            -c environment=prod \
+            --outputs-file cdk-outputs.json
+
+      - name: Upload CDK outputs
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cdk-outputs-prod
+          path: packages/infra/cdk-outputs.json
+          retention-days: 90
+
+  deploy-prod-dashboard:
+    name: Deploy Dashboard (prod)
+    runs-on: ubuntu-latest
+    needs: [deploy-prod-backend]
+    timeout-minutes: 15
+    environment: prod
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fe02b34f77f8bc703a7f0b4fee19bcbac4b21f62 # v4.1.0
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download CDK outputs
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: cdk-outputs-prod
+          path: packages/infra/
+
+      - name: Extract API URL
+        id: cdk
+        run: |
+          API_URL=$(cat packages/infra/cdk-outputs.json | python3 -c "
+          import sys, json
+          data = json.load(sys.stdin)
+          for stack in data.values():
+            for key, val in stack.items():
+              if 'apiurl' in key.lower() or 'ApiUrl' in key:
+                print(val)
+                sys.exit(0)
+          print('')
+          ")
+          echo "api_url=$API_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Build dashboard
+        working-directory: packages/dashboard
+        env:
+          VITE_API_URL: ${{ steps.cdk.outputs.api_url }}
+          VITE_COGNITO_USER_POOL_ID: ${{ vars.COGNITO_USER_POOL_ID }}
+          VITE_COGNITO_CLIENT_ID: ${{ vars.COGNITO_CLIENT_ID }}
+        run: pnpm build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: Deploy to S3
+        run: |
+          aws s3 sync packages/dashboard/dist/ \
+            s3://${{ vars.DASHBOARD_S3_BUCKET }} \
+            --delete \
+            --cache-control "public, max-age=31536000, immutable" \
+            --exclude "index.html" \
+            --exclude "*.json"
+
+          aws s3 cp packages/dashboard/dist/index.html \
+            s3://${{ vars.DASHBOARD_S3_BUCKET }}/index.html \
+            --cache-control "public, max-age=0, must-revalidate"
+
+      - name: Invalidate CloudFront cache
+        if: vars.CLOUDFRONT_DISTRIBUTION_ID != ''
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"

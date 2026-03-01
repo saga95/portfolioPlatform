@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
-    branches: [main]
+    branches: [master]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -17,7 +17,7 @@ jobs:
   lint-test-build:
     name: Lint, Test & Build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
@@ -46,10 +46,28 @@ jobs:
         run: pnpm nx affected -t lint --parallel=3
 
       - name: Test affected
-        run: pnpm nx affected -t test --parallel=3 --configuration=ci
+        run: pnpm nx affected -t test --parallel=3 -- --run
 
       - name: Build affected
         run: pnpm nx affected -t build --parallel=3
+
+      - name: Upload coverage (core)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: coverage-core
+          path: packages/core/coverage/
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Upload coverage (api)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: coverage-api
+          path: packages/api/coverage/
+          retention-days: 7
+          if-no-files-found: ignore
 
   format:
     name: Format Check
@@ -76,3 +94,31 @@ jobs:
 
       - name: Check formatting
         run: pnpm nx format:check
+
+  cdk-synth:
+    name: CDK Synth (Validate)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [lint-test-build]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fe02b34f77f8bc703a7f0b4fee19bcbac4b21f62 # v4.1.0
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: CDK Synth (dev)
+        working-directory: packages/infra
+        run: npx cdk synth -c environment=dev --no-staging

@@ -4,7 +4,7 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as lambdaNode from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as path from 'node:path';
-import { ProjectTable, ProjectApi, ExecutionApi, DeploymentApi, BillingApi, CognitoAuth } from '@promptdeploy/cdk-constructs';
+import { ProjectTable, ProjectApi, ExecutionApi, DeploymentApi, BillingApi, CognitoAuth, DashboardHosting } from '@promptdeploy/cdk-constructs';
 
 export interface ProjectStackProps extends cdk.StackProps {
   /**
@@ -32,6 +32,16 @@ export interface ProjectStackProps extends cdk.StackProps {
   readonly payhereReturnUrl?: string;
   readonly payhereCancelUrl?: string;
   readonly payhereSandbox?: boolean;
+
+  /**
+   * Custom domain names for the dashboard CloudFront distribution.
+   */
+  readonly dashboardDomainNames?: string[];
+
+  /**
+   * ACM certificate ARN for dashboard custom domain (must be in us-east-1).
+   */
+  readonly dashboardCertificateArn?: string;
 }
 
 /**
@@ -47,6 +57,9 @@ export class ProjectStack extends cdk.Stack {
   public readonly tableName: string;
   public readonly userPoolId: string;
   public readonly userPoolClientId: string;
+  public readonly dashboardBucketName: string;
+  public readonly dashboardDistributionId: string;
+  public readonly dashboardUrl: string;
 
   constructor(scope: Construct, id: string, props: ProjectStackProps) {
     super(scope, id, props);
@@ -275,16 +288,42 @@ export class ProjectStack extends cdk.Stack {
       },
     });
 
+    // ─── Dashboard Hosting ────────────────────────────────────────────
+
+    const dashboard = new DashboardHosting(this, 'Dashboard', {
+      environment: props.environment,
+      domainNames: props.dashboardDomainNames,
+      certificateArn: props.dashboardCertificateArn,
+    });
+
     // ─── Outputs ─────────────────────────────────────────────────────
 
     this.apiUrl = projectApi.apiUrl;
     this.tableName = projectTable.tableName;
     this.userPoolId = auth.userPoolId;
     this.userPoolClientId = auth.userPoolClientId;
+    this.dashboardBucketName = dashboard.bucketName;
+    this.dashboardDistributionId = dashboard.distributionId;
+    this.dashboardUrl = `https://${dashboard.distributionDomainName}`;
 
     new cdk.CfnOutput(this, 'StackEnvironment', {
       value: props.environment,
       description: 'Deployment environment',
+    });
+
+    new cdk.CfnOutput(this, 'DashboardBucketName', {
+      value: dashboard.bucketName,
+      description: 'S3 bucket for dashboard static assets',
+    });
+
+    new cdk.CfnOutput(this, 'DashboardDistributionId', {
+      value: dashboard.distributionId,
+      description: 'CloudFront distribution ID for dashboard',
+    });
+
+    new cdk.CfnOutput(this, 'DashboardUrl', {
+      value: `https://${dashboard.distributionDomainName}`,
+      description: 'CloudFront URL for the dashboard',
     });
   }
 }

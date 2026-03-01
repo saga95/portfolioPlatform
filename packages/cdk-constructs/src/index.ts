@@ -12,3 +12,5 @@ export { BillingApi } from './billing-api.js';
 export type { BillingApiProps } from './billing-api.js';
 export { CognitoAuth } from './cognito-auth.js';
 export type { CognitoAuthProps } from './cognito-auth.js';
+export { DashboardHosting } from './dashboard-hosting.js';
+export type { DashboardHostingProps } from './dashboard-hosting.js';
