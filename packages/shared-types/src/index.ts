@@ -249,3 +249,124 @@ export interface ApiErrorResponse {
   readonly details?: Record<string, unknown>;
   readonly requestId: string;
 }
+
+// ─── LLM / AI Bounded Context ─────────────────────────────────────────────────
+
+/**
+ * Supported LLM model identifiers for AWS Bedrock.
+ */
+export type LlmModelId =
+  | 'anthropic.claude-3-5-sonnet-20241022-v2:0'
+  | 'anthropic.claude-3-5-haiku-20241022-v1:0'
+  | 'anthropic.claude-3-opus-20240229-v1:0'
+  | 'anthropic.claude-3-sonnet-20240229-v1:0'
+  | 'anthropic.claude-3-haiku-20240307-v1:0';
+
+/**
+ * Role of a message in a conversation.
+ */
+export type MessageRole = 'user' | 'assistant';
+
+/**
+ * A single message in an LLM conversation.
+ */
+export interface LlmMessage {
+  readonly role: MessageRole;
+  readonly content: string;
+}
+
+/**
+ * Request to an LLM provider.
+ */
+export interface LlmRequest {
+  readonly modelId: LlmModelId;
+  readonly systemPrompt?: string;
+  readonly messages: LlmMessage[];
+  readonly maxTokens: number;
+  readonly temperature?: number;
+  readonly topP?: number;
+  readonly stopSequences?: string[];
+}
+
+/**
+ * Response from an LLM provider.
+ */
+export interface LlmResponse {
+  readonly content: string;
+  readonly inputTokens: number;
+  readonly outputTokens: number;
+  readonly stopReason: LlmStopReason;
+  readonly modelId: LlmModelId;
+}
+
+/**
+ * Reason the LLM stopped generating.
+ */
+export type LlmStopReason =
+  | 'end_turn'
+  | 'max_tokens'
+  | 'stop_sequence'
+  | 'content_filtered'
+  | 'tool_use';
+
+/**
+ * A chunk from a streaming LLM response.
+ */
+export interface LlmStreamChunk {
+  readonly type: 'content_delta' | 'message_start' | 'message_stop' | 'metadata';
+  readonly content?: string;
+  readonly inputTokens?: number;
+  readonly outputTokens?: number;
+  readonly stopReason?: LlmStopReason;
+}
+
+/**
+ * Configuration for the LLM provider.
+ */
+export interface LlmProviderConfig {
+  readonly region: string;
+  readonly defaultModelId: LlmModelId;
+  readonly fallbackModelId?: LlmModelId;
+  readonly maxRetries: number;
+  readonly timeoutMs: number;
+}
+
+/**
+ * Token budget limits by subscription plan.
+ */
+export const TOKEN_LIMITS_BY_PLAN: Record<Plan, number> = {
+  free: 10_000,
+  pro: 100_000,
+  team: 200_000,
+  enterprise: 500_000,
+};
+
+/**
+ * Cost per 1K tokens by model (input/output in USD).
+ */
+export interface ModelPricing {
+  readonly inputPer1K: number;
+  readonly outputPer1K: number;
+}
+
+export const MODEL_PRICING: Record<LlmModelId, ModelPricing> = {
+  'anthropic.claude-3-5-sonnet-20241022-v2:0': { inputPer1K: 0.003, outputPer1K: 0.015 },
+  'anthropic.claude-3-5-haiku-20241022-v1:0': { inputPer1K: 0.0008, outputPer1K: 0.004 },
+  'anthropic.claude-3-opus-20240229-v1:0': { inputPer1K: 0.015, outputPer1K: 0.075 },
+  'anthropic.claude-3-sonnet-20240229-v1:0': { inputPer1K: 0.003, outputPer1K: 0.015 },
+  'anthropic.claude-3-haiku-20240307-v1:0': { inputPer1K: 0.00025, outputPer1K: 0.00125 },
+};
+
+/**
+ * LLM usage record for billing and analytics.
+ */
+export interface LlmUsageRecord {
+  readonly usageId: string;
+  readonly tenantId: string;
+  readonly executionId: string;
+  readonly modelId: LlmModelId;
+  readonly inputTokens: number;
+  readonly outputTokens: number;
+  readonly costUsd: number;
+  readonly timestamp: string;
+}

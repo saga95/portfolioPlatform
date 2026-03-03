@@ -3,3 +3,4 @@ export type { ExecutionRepository, ExecutionListResult } from './execution-repos
 export type { IdGenerator } from './id-generator.js';
 export type { DeploymentRepository, DeploymentListResult } from './deployment-repository.js';
 export type { SubscriptionRepository, SubscriptionListResult } from './subscription-repository.js';
+export type { LlmProvider, LlmProviderFactory, LlmError, LlmErrorCode } from './llm-provider.js';

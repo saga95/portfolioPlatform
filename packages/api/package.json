@@ -11,6 +11,7 @@
     "lint": "eslint src/"
   },
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.996.0",
     "@aws-sdk/client-dynamodb": "^3.996.0",
     "@aws-sdk/lib-dynamodb": "^3.996.0",
     "@middy/core": "^7.1.1",
